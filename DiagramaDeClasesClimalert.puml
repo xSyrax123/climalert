@@ -1,0 +1,61 @@
+
+@startuml
+
+' ── Monitoreo y detección ──────────────────────────
+
+class Clima {
+  -id : Long
+  -ubicacion : String
+  -temperaturaCelsius : Double
+  -humedad : Integer
+  -condicion : String
+  -velocidadVientoKmh : Double
+  -sensacionTermicaCelsius : Double
+  -fechaRegistro : LocalDateTime
+  -procesado : boolean
+  ' alerta si temperaturaCelsius > 35 y humedad > 60
+  +esCondicionDeAlerta() : boolean
+  +marcarProcesado() : void
+}
+
+class Alerta {
+  -id : Long
+  -fechaGeneracion : LocalDateTime
+  +asunto() : String
+  +detalleCompleto() : String
+}
+
+Alerta --> Clima
+
+' ── Notificación por correo ─────────────────────────
+
+class Notificacion {
+  -destinatario : String
+  -asunto : String
+  -cuerpo : String
+  -fechaCreacion : LocalDateTime
+  -estado : EstadoNotificacion
+  +marcarComoEnviada() : void
+  +marcarComoFallida() : void
+}
+
+enum EstadoNotificacion {
+  PENDIENTE
+  ENVIADO
+  FALLIDO
+}
+
+interface CanalNotificacion {
+  +enviar(notificacion : Notificacion) : void
+}
+
+class EmailNotifierJavaMail implements CanalNotificacion {
+  -mailSender : JavaMailSender
+  -remitente : String
+  +enviar(notificacion : Notificacion) : void
+}
+
+Notificacion --> EstadoNotificacion
+CanalNotificacion ..> Notificacion
+
+@enduml
